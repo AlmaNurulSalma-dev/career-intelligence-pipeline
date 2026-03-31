@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+
+# Azure
+.env
+*.local
+appsettings.json
+secrets.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp
+*.tmp
+*.log
+temp/
+
+# SSH Keys
+# Stored in ~/.ssh/ directory (outside project folder)
+# No need to gitignore keys not in project repo

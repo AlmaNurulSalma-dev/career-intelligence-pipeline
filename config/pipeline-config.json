@@ -1,0 +1,306 @@
+{
+  "project": {
+    "name": "Career Intelligence Pipeline",
+    "owner": "Alma",
+    "version": "1.0.0",
+    "status": "development",
+    "created_date": "2026-03-31"
+  },
+  "data_sources": {
+    "linkedin_csv": {
+      "type": "flat_file_csv",
+      "description": "LinkedIn skill profile export",
+      "location_local": "raw/linkedin-csv/",
+      "location_adls": "/raw/linkedin-csv/YYYY/MM/DD/",
+      "frequency": "manual_monthly",
+      "format": "csv",
+      "encoding": "utf-8",
+      "delimiter": ",",
+      "columns_expected": [
+        "profile_id",
+        "full_name",
+        "headline",
+        "skills",
+        "experience",
+        "education"
+      ]
+    },
+    "config_json": {
+      "type": "flat_file_json",
+      "description": "User preferences and custom skills",
+      "location_adls": "/raw/config-json/YYYY/MM/DD/",
+      "frequency": "manual",
+      "format": "json",
+      "structure": {
+        "user_preferences": {
+          "target_roles": ["string"],
+          "preferred_industries": ["string"],
+          "salary_expectations": {
+            "min": "number",
+            "max": "number"
+          }
+        },
+        "custom_skills": [
+          {
+            "skill_name": "string",
+            "proficiency": "junior|mid|senior",
+            "years_experience": "number"
+          }
+        ]
+      }
+    },
+    "glints_scraping": {
+      "type": "web_scraping",
+      "description": "Glints job listings via web scraping",
+      "base_url": "https://glints.com/id/jobs",
+      "frequency": "daily",
+      "schedule_time": "02:00 UTC+7",
+      "location_adls": "/raw/glints/YYYY/MM/DD/",
+      "scraping_method": "selenium",
+      "anti_scraping_measures": {
+        "use_rotating_proxies": true,
+        "random_delay_seconds": "2-5",
+        "user_agent_rotation": true,
+        "javascript_rendering": true
+      },
+      "error_handling": {
+        "retry_attempts": 3,
+        "retry_delay_seconds": 10,
+        "timeout_seconds": 30
+      },
+      "monitoring": {
+        "track_scraper_health": true,
+        "alert_on_failure": true
+      },
+      "parameters": {
+        "search_keywords": ["data engineer", "data analyst", "backend engineer"],
+        "location": "Indonesia",
+        "pagination": "scroll_based"
+      }
+    },
+    "jobstreet_scraping": {
+      "type": "web_scraping",
+      "description": "JobStreet job listings via web scraping",
+      "base_url": "https://www.jobstreet.com.sg/id/jobs",
+      "frequency": "daily",
+      "schedule_time": "03:00 UTC+7",
+      "location_adls": "/raw/jobstreet/YYYY/MM/DD/",
+      "scraping_method": "selenium",
+      "anti_scraping_measures": {
+        "use_rotating_proxies": true,
+        "random_delay_seconds": "2-5",
+        "user_agent_rotation": true,
+        "javascript_rendering": true
+      },
+      "error_handling": {
+        "retry_attempts": 3,
+        "retry_delay_seconds": 10,
+        "timeout_seconds": 30
+      },
+      "monitoring": {
+        "track_scraper_health": true,
+        "alert_on_failure": true
+      },
+      "parameters": {
+        "search_keywords": ["data engineer", "data analyst", "backend engineer"],
+        "location": "Indonesia",
+        "pagination": "page_based"
+      }
+    },
+    "historical_data": {
+      "type": "self_collected",
+      "description": "Historical trends data collected weekly for trend analysis",
+      "location_adls": "/raw/historical/YYYY/week-XX/",
+      "frequency": "weekly_manual",
+      "collection_method": "archive_weekly_scrapes",
+      "purpose": "Calculate skill trends, salary benchmarks, hiring patterns",
+      "retention_policy": "permanent",
+      "data_points": [
+        "skill_frequency_by_week",
+        "salary_ranges_by_week",
+        "company_hiring_patterns",
+        "job_title_trends"
+      ]
+    }
+  },
+  "azure_resources": {
+    "subscription_id": "YOUR_SUBSCRIPTION_ID_HERE",
+    "subscription_name": "Pay-As-You-Go",
+    "resource_group": "rg-career-intelligence",
+    "region": "Southeast Asia",
+    "location_code": "southeastasia",
+    "storage_account": {
+      "name": "sacareerintelligence",
+      "sku": "Standard_LRS",
+      "tier": "Standard",
+      "kind": "StorageV2"
+    },
+    "data_lake": {
+      "name": "sacareerintelligence",
+      "containers": [
+        {
+          "name": "raw",
+          "description": "Raw ingested data from all sources"
+        },
+        {
+          "name": "transform",
+          "description": "Transformed and staged data"
+        }
+      ]
+    },
+    "sql_database": {
+      "server": "career-intelligence-server",
+      "server_fqdn": "career-intelligence-server.database.windows.net",
+      "database_name": "career-intelligence-db",
+      "tier": "Standard",
+      "edition": "Standard",
+      "service_objective": "S1",
+      "admin_username": "sqladmin"
+    },
+    "synapse_workspace": {
+      "name": "synapse-career-intel",
+      "storage_account": "sacareerintelligence",
+      "spark_pool": {
+        "name": "sparkpool",
+        "node_count": 3,
+        "node_size": "Small",
+        "auto_scale_enabled": true,
+        "auto_scale_min": 3,
+        "auto_scale_max": 10
+      }
+    },
+    "adf": {
+      "name": "adf-career-intelligence",
+      "region": "Southeast Asia"
+    },
+    "purview": {
+      "account_name": "purview-career-intel",
+      "managed_resource_group": "purview-managed-rg"
+    },
+    "key_vault": {
+      "name": "kv-career-intelligence",
+      "sku": "standard"
+    }
+  },
+  "transformations": {
+    "adf_dataflow": {
+      "steps": [
+        "flatten_nested_json",
+        "filter_remove_nulls",
+        "remove_unused_columns",
+        "deduplication",
+        "column_normalization",
+        "industry_categorization",
+        "join_datasets"
+      ]
+    },
+    "synapse_spark": {
+      "notebooks": [
+        {
+          "name": "html_parsing",
+          "description": "Parse and clean HTML from scraped data (Glints, JobStreet)"
+        },
+        {
+          "name": "skill_extraction",
+          "description": "NLP-based skill extraction from job descriptions"
+        },
+        {
+          "name": "match_scoring",
+          "description": "Calculate match percentage between user skills and job requirements"
+        },
+        {
+          "name": "skill_gap_analysis",
+          "description": "Identify missing skills per job"
+        },
+        {
+          "name": "market_trends",
+          "description": "Aggregate trending skills week-over-week + detect growth patterns"
+        },
+        {
+          "name": "salary_benchmarking",
+          "description": "Compute salary ranges by role, industry, experience level"
+        }
+      ]
+    }
+  },
+  "monitoring": {
+    "types": [
+      "pipeline_failure",
+      "data_quality",
+      "performance",
+      "data_freshness",
+      "cost",
+      "business_metrics"
+    ],
+    "alert_email": "almanurulsalma@gmail.com",
+    "alert_channels": {
+      "developer": {
+        "email": "almanurulsalma@gmail.com",
+        "triggers": [
+          "pipeline_failed",
+          "data_quality_failed",
+          "cost_exceeded_threshold"
+        ]
+      },
+      "user": {
+        "email": "almanurulsalma@gmail.com",
+        "frequency": "weekly",
+        "trigger": "pipeline_success"
+      }
+    }
+  },
+  "pipeline_schedule": {
+    "skill_profile": {
+      "frequency": "manual",
+      "description": "User manually uploads LinkedIn CSV export"
+    },
+    "job_listings_scraping": {
+      "frequency": "daily",
+      "start_time_glints": "02:00 UTC+7",
+      "start_time_jobstreet": "03:00 UTC+7",
+      "timezone": "UTC+7",
+      "description": "Scrape Glints and JobStreet daily for job listings"
+    },
+    "historical_data_collection": {
+      "frequency": "weekly",
+      "day": "Monday",
+      "time": "04:00 UTC+7",
+      "description": "Archive and aggregate weekly scrape data for trend analysis"
+    },
+    "transformations": {
+      "trigger": "on_success_of_ingestion",
+      "description": "Run ADF Data Flow + Synapse Spark after scraping completes"
+    },
+    "load": {
+      "trigger": "on_success_of_transformations",
+      "description": "Load cleaned data to Azure SQL"
+    },
+    "notifications": {
+      "trigger": "on_success_of_load",
+      "frequency": "weekly",
+      "day": "Monday",
+      "time": "08:00 UTC+7",
+      "description": "Send weekly digest email to user"
+    }
+  },
+  "data_retention": {
+    "raw_layer": "90 days",
+    "transform_layer": "180 days",
+    "sql_database": "permanent",
+    "archival_strategy": "Delete old raw data monthly to minimize storage cost"
+  },
+  "environment_variables": {
+    "AZURE_SUBSCRIPTION_ID": "from_secrets.json",
+    "AZURE_RESOURCE_GROUP": "rg-career-intelligence",
+    "ADLS_ACCOUNT_NAME": "sacareerintelligence",
+    "SQL_SERVER": "career-intelligence-server.database.windows.net",
+    "SQL_DATABASE": "career-intelligence-db",
+    "SYNAPSE_WORKSPACE": "synapse-career-intel",
+    "PURVIEW_ACCOUNT": "purview-career-intel",
+    "GLINTS_BASE_URL": "https://glints.com/id/jobs",
+    "JOBSTREET_BASE_URL": "https://www.jobstreet.com.sg/id/jobs",
+    "SELENIUM_DRIVER": "chromedriver",
+    "PROXY_LIST_LOCATION": "config/proxies.txt",
+    "USER_AGENTS_LOCATION": "config/user_agents.txt"
+  }
+}
