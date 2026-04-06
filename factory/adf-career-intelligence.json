@@ -1,0 +1,9 @@
+{
+	"name": "adf-career-intelligence",
+	"location": "southeastasia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "f5a34a49-8481-4869-9480-f947d5219d27",
+		"tenantId": "6d5c2f34-5e9d-4afd-bc13-435f63ad8432"
+	}
+}
