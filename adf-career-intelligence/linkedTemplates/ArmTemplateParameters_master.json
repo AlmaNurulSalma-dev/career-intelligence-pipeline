@@ -10,6 +10,12 @@
 		},
 		"LinkedService_ADLS_properties_typeProperties_url": {
 			"value": "https://sacareerintelligence.dfs.core.windows.net/"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
 		}
 	}
 }
