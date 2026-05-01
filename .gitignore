@@ -31,3 +31,6 @@ temp/
 # SSH Keys
 # Stored in ~/.ssh/ directory (outside project folder)
 # No need to gitignore keys not in project repo
+
+scrapers/output/*.json
+scrapers/output/*.csv
