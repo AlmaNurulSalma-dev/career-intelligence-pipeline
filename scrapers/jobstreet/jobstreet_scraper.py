@@ -188,10 +188,10 @@ def scrape_jobstreet(lokasi, search_term="", jenis_pekerjaan=None, opsi_tempat_k
     return jobs
 
 def main():
-    # FULL CONFIG - scale up
-    lokasi = ["jakarta", "bekasi", "tangerang"]
-    jenis_pekerjaan_list = ["Penuh waktu", "Kontrak/Temporer"]
-    opsi_tempat_kerja_list = ["Kantor", "Hibrid"]
+    # FULL CONFIG
+    lokasi = ["jakarta"]
+    jenis_pekerjaan_list = ["Penuh waktu", "Paruh waktu"]
+    opsi_tempat_kerja_list = ["Kantor", "Hibrid", "Jarak jauh"]
     
     all_jobs = []
     total_combinations = len(lokasi) * len(jenis_pekerjaan_list) * len(opsi_tempat_kerja_list)
