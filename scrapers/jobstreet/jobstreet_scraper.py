@@ -141,8 +141,8 @@ def extract_job_details(page, job_url):
             "benefits": "Not available"
         }
     
-def scrape_jobstreet(lokasi, search_term=""):
-    """Scrape JobStreet listings"""
+def scrape_jobstreet(lokasi, search_term="", jenis_pekerjaan=None, opsi_tempat_kerja=None, diposting=None):
+    """Scrape JobStreet listings with optional filters"""
     jobs = []
     
     try: 
@@ -154,6 +154,11 @@ def scrape_jobstreet(lokasi, search_term=""):
             search_url = f"https://id.jobstreet.com/id/jobs?keyword={search_term}&location={lokasi}"
             page.goto(search_url, wait_until="domcontentloaded")
             page.wait_for_timeout(3000)
+            
+            # Apply filters if provided
+            if jenis_pekerjaan or opsi_tempat_kerja or diposting:
+                apply_filters(page, jenis_pekerjaan, opsi_tempat_kerja, diposting)
+                page.wait_for_timeout(2000)
             
             job_cards = page.locator("a[data-automation='job-list-item-link-overlay']").all()
             
@@ -177,24 +182,42 @@ def scrape_jobstreet(lokasi, search_term=""):
     return jobs
 
 def main():
-    lokasi = ["jakarta"]
-    all_jobs = []
+    # FULL CONFIG - scale up
+    lokasi = ["jakarta", "bekasi", "tangerang"]
+    jenis_pekerjaan_list = ["Penuh waktu", "Kontrak/Temporer"]
+    opsi_tempat_kerja_list = ["Kantor", "Hibrid"]
     
-    print(f"Starting JobStreet Indonesia scraping")
+    all_jobs = []
+    total_combinations = len(lokasi) * len(jenis_pekerjaan_list) * len(opsi_tempat_kerja_list)
+    current = 0
+    
+    print(f"Starting JobStreet Indonesia scraping - FULL CONFIG")
+    print(f"Locations: {', '.join(lokasi)}")
+    print(f"Jenis Pekerjaan: {', '.join(jenis_pekerjaan_list)}")
+    print(f"Opsi Tempat Kerja: {', '.join(opsi_tempat_kerja_list)}")
     print(f"Search term: 'Data Engineer'")
+    print(f"Total combinations: {total_combinations}")
     print("-" * 80)
     
     for location in lokasi:
-        print(f"\nScraping: {location}")
-        
-        try:
-            jobs = scrape_jobstreet(location, search_term="Data Engineer")
-            all_jobs.extend(jobs)
-            print(f"[OK] Found {len(jobs)} jobs")
-        except Exception as e:
-            print(f"[ERROR] {e}")
-        
-        time.sleep(2)
+        for jenis_kerja in jenis_pekerjaan_list:
+            for opsi_tempat in opsi_tempat_kerja_list:
+                current += 1
+                print(f"\n[{current}/{total_combinations}] {location} - {jenis_kerja} - {opsi_tempat}")
+                
+                try:
+                    jobs = scrape_jobstreet(
+                        location, 
+                        search_term="Data Engineer",
+                        jenis_pekerjaan=jenis_kerja,
+                        opsi_tempat_kerja=opsi_tempat
+                    )
+                    all_jobs.extend(jobs)
+                    print(f"[OK] Found {len(jobs)} jobs")
+                except Exception as e:
+                    print(f"[ERROR] {e}")
+                
+                time.sleep(2)
     
     output_dir = r"C:\Users\kinet\OneDrive\Documents\PROJECT-ALMAAA\career-intelligence-pipeline\scrapers\output"
     os.makedirs(output_dir, exist_ok=True)
