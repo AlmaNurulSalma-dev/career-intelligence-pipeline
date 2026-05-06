@@ -77,3 +77,40 @@ def scrape_jobstreet(lokasi, search_term=""):
         return []
             
     return jobs
+
+def main():
+    lokasi = ["jakarta"]
+    all_jobs = []
+    
+    print(f"Starting JobStreet Indonesia scraping")
+    print(f"Search term: 'Data Engineer'")
+    print("-" * 80)
+    
+    for location in lokasi:
+        print(f"\nScraping: {location}")
+        
+        try:
+            jobs = scrape_jobstreet(location, search_term="Data Engineer")
+            all_jobs.extend(jobs)
+            print(f"[OK] Found {len(jobs)} jobs")
+        except Exception as e:
+            print(f"[ERROR] {e}")
+        
+        time.sleep(2)
+    
+    output_dir = r"C:\Users\kinet\OneDrive\Documents\PROJECT-ALMAAA\career-intelligence-pipeline\scrapers\output"
+    os.makedirs(output_dir, exist_ok=True)
+    
+    filename = f"jobstreet_indo_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+    output_path = os.path.join(output_dir, filename)
+    
+    try:
+        with open(output_path, 'w', encoding='utf-8') as f:
+            json.dump(all_jobs, f, ensure_ascii=False, indent=2)
+        print(f"\n[OK] Total jobs: {len(all_jobs)}")
+        print(f"[OK] Saved to: {output_path}")
+    except Exception as e:
+        print(f"[ERROR] {e}")
+
+if __name__ == "__main__":
+    main()
