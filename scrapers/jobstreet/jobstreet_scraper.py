@@ -1,3 +1,62 @@
+JENIS_PEKERJAAN_MAPPING = {
+    "Penuh waktu": "Penuh waktu",
+    "Paruh waktu": "Paruh waktu",
+    "Kontrak/Temporer": "Kontrak/Temporer",
+    "Kasual/Liburan": "Kasual/Liburan"
+}
+
+OPSI_TEMPAT_KERJA_MAPPING = {
+    "Kantor": "Kantor",
+    "Hibrid": "Hibrid",
+    "Jarak Jauh": "Jarak Jauh"
+}
+
+DIPOSTING_MAPPING = {
+    "Kapan saja": "Kapan saja",
+    "Hari Ini": "Hari Ini",
+    "3 hari terakhir": "3 hari terakhir",
+    "7 hari terakhir": "7 hari terakhir",
+    "14 hari terakhir": "14 hari terakhir",
+    "30 hari terakhir": "30 hari terakhir"
+}
+
+def apply_filters(page, jenis_pekerjaan=None, opsi_tempat_kerja=None, diposting=None):
+    """Apply filters on JobStreet listing page"""
+    try:
+        # === JENIS PEKERJAAN ===
+        if jenis_pekerjaan:
+            page.locator("label[for='RefineBar--WorkType']").first.click(force=True)
+            page.wait_for_timeout(500)
+            page.locator("label[for='RefineBar--WorkType'] div._1tb4u6cr div._1tb4u6cq").first.click()
+            page.wait_for_timeout(500)
+            jenis_pekerjaan_label = JENIS_PEKERJAAN_MAPPING.get(jenis_pekerjaan)
+            page.locator(f"a[aria-label='{jenis_pekerjaan_label}']").first.click(force=True)
+            page.wait_for_timeout(500)
+        
+        # === OPSI TEMPAT KERJA ===
+        if opsi_tempat_kerja:
+            page.locator("label[for='RefineBar--WorkArrangement']").first.click(force=True)
+            page.wait_for_timeout(500)
+            page.locator("label[for='RefineBar--WorkArrangement'] div._1tb4u6cr div._1tb4u6cq").first.click()
+            page.wait_for_timeout(500)
+            opsi_tempat_kerja_label = OPSI_TEMPAT_KERJA_MAPPING.get(opsi_tempat_kerja)
+            page.locator(f"a[aria-label='{opsi_tempat_kerja_label}']").first.click(force=True)
+            page.wait_for_timeout(500)
+        
+        # === DIPOSTING ===
+        if diposting:
+            page.locator("label[for='RefineBar--DateListed']").first.click(force=True)
+            page.wait_for_timeout(500)
+            page.locator("label[for='RefineBar--DateListed'] div._1tb4u6cr div._1tb4u6cq").first.click()
+            page.wait_for_timeout(500)
+            diposting_label = DIPOSTING_MAPPING.get(diposting)
+            page.locator(f"a[aria-label='{diposting_label}']").first.click(force=True)
+            page.wait_for_timeout(500)
+
+    except Exception as e:
+        print(f"Error applying filters: {e}")
+        raise
+
 def extract_job_card_info(card):
     """Extract job info from listing page card"""
     try:
