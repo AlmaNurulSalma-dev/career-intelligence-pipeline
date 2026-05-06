@@ -43,6 +43,45 @@ def extract_job_card_info(card):
         print(f"Error extracting card info: {e}")
         return None
     
+def extract_job_details(page, job_url):
+    """Extract detailed info from job detail page"""
+    try:
+        page.goto(job_url, wait_until="domcontentloaded")
+        page.wait_for_timeout(2000)
+        
+        detail_info = {}
+        
+        # Extract job description
+        try:
+            description = page.locator("div[data-automation='jobDescription']").inner_text()
+            detail_info["full_description"] = description.strip()
+        except:
+            detail_info["full_description"] = "Not available"
+        
+        # Extract qualifications/requirements
+        try:
+            qualifications = page.locator("div[data-automation='jobRequirements']").inner_text()
+            detail_info["qualifications"] = qualifications.strip()
+        except:
+            detail_info["qualifications"] = "Not available"
+        
+        # Extract benefits
+        try:
+            benefits = page.locator("div[data-automation='jobBenefits']").inner_text()
+            detail_info["benefits"] = benefits.strip()
+        except:
+            detail_info["benefits"] = "Not available"
+        
+        return detail_info
+        
+    except Exception as e:
+        print(f"Error extracting job details: {e}")
+        return {
+            "full_description": "Not available",
+            "qualifications": "Not available",
+            "benefits": "Not available"
+        }
+    
 def scrape_jobstreet(lokasi, search_term=""):
     """Scrape JobStreet listings"""
     jobs = []
