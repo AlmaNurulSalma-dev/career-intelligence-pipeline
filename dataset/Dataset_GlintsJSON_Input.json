@@ -1,0 +1,57 @@
+{
+	"name": "Dataset_GlintsJSON_Input",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LinkedService_ADLS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "glints_jobs_20260506_144351.json",
+				"folderPath": "glints/2026/05/06",
+				"fileSystem": "raw"
+			}
+		},
+		"schema": {
+			"type": "object",
+			"properties": {
+				"job_id": {
+					"type": "string"
+				},
+				"title": {
+					"type": "string"
+				},
+				"company": {
+					"type": "string"
+				},
+				"location": {
+					"type": "string"
+				},
+				"salary": {
+					"type": "string"
+				},
+				"posted_date": {
+					"type": "string"
+				},
+				"job_url": {
+					"type": "string"
+				},
+				"job_type": {
+					"type": "string"
+				},
+				"work_policy": {
+					"type": "string"
+				},
+				"experience_required": {
+					"type": "string"
+				},
+				"description": {
+					"type": "string"
+				}
+			}
+		}
+	}
+}

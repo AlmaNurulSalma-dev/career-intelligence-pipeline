@@ -1,0 +1,38 @@
+{
+	"name": "DataFlow_JobListingTransform",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Dataset_GlintsJSON_Input",
+						"type": "DatasetReference"
+					},
+					"name": "SourceGlints"
+				}
+			],
+			"sinks": [],
+			"transformations": [],
+			"scriptLines": [
+				"source(output(",
+				"          job_id as string,",
+				"          title as string,",
+				"          company as string,",
+				"          location as string,",
+				"          salary as string,",
+				"          posted_date as string,",
+				"          job_url as string,",
+				"          job_type as string,",
+				"          work_policy as string,",
+				"          experience_required as string,",
+				"          description as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     documentForm: 'documentPerLine') ~> SourceGlints"
+			]
+		}
+	}
+}
