@@ -1,3 +1,9 @@
+from playwright.sync_api import sync_playwright
+from datetime import datetime
+import os
+import json
+import time
+
 JENIS_PEKERJAAN_MAPPING = {
     "Penuh waktu": "Penuh waktu",
     "Paruh waktu": "Paruh waktu",
