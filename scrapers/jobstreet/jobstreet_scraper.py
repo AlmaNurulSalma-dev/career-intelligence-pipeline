@@ -42,3 +42,38 @@ def extract_job_card_info(card):
     except Exception as e:
         print(f"Error extracting card info: {e}")
         return None
+    
+def scrape_jobstreet(lokasi, search_term=""):
+    """Scrape JobStreet listings"""
+    jobs = []
+    
+    try: 
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=False)
+            page = browser.new_page()
+            page.set_default_timeout(30000)
+            
+            search_url = f"https://id.jobstreet.com/id/jobs?keyword={search_term}&location={lokasi}"
+            page.goto(search_url, wait_until="domcontentloaded")
+            page.wait_for_timeout(3000)
+            
+            job_cards = page.locator("a[data-automation='job-list-item-link-overlay']").all()
+            
+            print(f"  Found {len(job_cards)} job cards")
+            
+            for card in job_cards[:10]:
+                try:
+                    basic_info = extract_job_card_info(card)
+                    if basic_info:
+                        print(f"    [{len(jobs) + 1}/10] {basic_info['title']}")
+                        jobs.append(basic_info)
+                except Exception as e:
+                    print(f"    [SKIP] Error: {str(e)[:40]}...")
+                    
+            browser.close()
+    
+    except Exception as e:
+        print(f"Error scraping: {e}")
+        return []
+            
+    return jobs
