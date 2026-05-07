@@ -19,7 +19,15 @@
 					"name": "SourceJobStreet"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Dataset_JobListings_Transform_Output",
+						"type": "DatasetReference"
+					},
+					"name": "SinkTranform"
+				}
+			],
 			"transformations": [
 				{
 					"name": "SelectGlints"
@@ -156,7 +164,14 @@
 				"          job_url",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> FinalDeduplicated"
+				"     skipDuplicateMapOutputs: true) ~> FinalDeduplicated",
+				"FinalDeduplicated sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> SinkTranform"
 			]
 		}
 	}
