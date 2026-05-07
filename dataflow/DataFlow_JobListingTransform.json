@@ -144,7 +144,7 @@
 				"          job_type_normalized = first(job_type_normalized),",
 				"          salary_normalized = first(salary_normalized),",
 				"          description = first(description),",
-				"          posted_date = max(posted_date),",
+				"          max_posted_date = max(posted_date),",
 				"          experience_required = first(experience_required),",
 				"          work_policy = first(work_policy),",
 				"          job_url = first(job_url)) ~> DeduplicateJobs",
