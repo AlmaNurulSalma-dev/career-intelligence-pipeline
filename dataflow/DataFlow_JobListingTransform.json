@@ -41,6 +41,9 @@
 				},
 				{
 					"name": "UnionJobListings"
+				},
+				{
+					"name": "FilterEmpty"
 				}
 			],
 			"scriptLines": [
@@ -116,7 +119,8 @@
 				"          location_normalized = lower(trim(iif(locate(location, ',') > 0, substring(location, 1, locate(location, ',') - 1), location))),",
 				"          job_type_normalized = lower(   iif(locate(lower(job_type), 'penuh') > 0 || locate(lower(job_type), 'full') > 0,     'full time',   iif(locate(lower(job_type), 'paruh') > 0,     'part time',   iif(locate(lower(job_type), 'kontrak') > 0,     'contract',   iif(locate(lower(job_type), 'magang') > 0,     'internship',   iif(locate(lower(job_type), 'freelance') > 0,     'freelance',   iif(locate(lower(job_type), 'kasual') > 0,     'casual',     'unknown'   )))))) ),",
 				"          salary_normalized = iif(locate(salary, 'Not specified') > 0,    'Not specified',   salary)) ~> NormalizeJobStreet",
-				"NormalizeGlints, NormalizeJobStreet union(byName: true)~> UnionJobListings"
+				"NormalizeGlints, NormalizeJobStreet union(byName: true)~> UnionJobListings",
+				"UnionJobListings filter(length(trim(description)) > 0) ~> FilterEmpty"
 			]
 		}
 	}
