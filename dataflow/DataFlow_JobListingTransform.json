@@ -10,10 +10,39 @@
 						"type": "DatasetReference"
 					},
 					"name": "SourceGlints"
+				},
+				{
+					"dataset": {
+						"referenceName": "Dataset_JobStreetJSON_Input",
+						"type": "DatasetReference"
+					},
+					"name": "SourceJobStreet"
 				}
 			],
 			"sinks": [],
-			"transformations": [],
+			"transformations": [
+				{
+					"name": "SelectGlints"
+				},
+				{
+					"name": "SelectJobStreet"
+				},
+				{
+					"name": "DerivedGlints"
+				},
+				{
+					"name": "DerivedJobStreet"
+				},
+				{
+					"name": "NormalizeGlints"
+				},
+				{
+					"name": "NormalizeJobStreet"
+				},
+				{
+					"name": "UnionJobListings"
+				}
+			],
 			"scriptLines": [
 				"source(output(",
 				"          job_id as string,",
@@ -31,7 +60,63 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false,",
-				"     documentForm: 'documentPerLine') ~> SourceGlints"
+				"     documentForm: 'documentPerLine') ~> SourceGlints",
+				"source(output(",
+				"          job_id as string,",
+				"          title as string,",
+				"          company as string,",
+				"          location as string,",
+				"          job_type as string,",
+				"          salary as string,",
+				"          description as string,",
+				"          job_url as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     documentForm: 'documentPerLine') ~> SourceJobStreet",
+				"SourceGlints select(mapColumn(",
+				"          job_id,",
+				"          title,",
+				"          company,",
+				"          location,",
+				"          salary,",
+				"          posted_date,",
+				"          job_url,",
+				"          job_type,",
+				"          work_policy,",
+				"          experience_required,",
+				"          description",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> SelectGlints",
+				"SourceJobStreet select(mapColumn(",
+				"          job_id,",
+				"          title,",
+				"          company,",
+				"          location,",
+				"          job_type,",
+				"          salary,",
+				"          description,",
+				"          job_url",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> SelectJobStreet",
+				"SelectGlints derive(source = 'glints',",
+				"          composite_id = md5(concat('glints', job_id))) ~> DerivedGlints",
+				"SelectJobStreet derive(source = 'jobstreet',",
+				"          composite_id = md5(concat('jobstreet', job_id))) ~> DerivedJobStreet",
+				"DerivedGlints derive(title_normalized = trim(lower(title)),",
+				"          company_normalized = trim(lower(company)),",
+				"          location_normalized = lower(trim(iif(locate(location, ',') > 0, substring(location, 1, locate(location, ',') - 1), location))),",
+				"          job_type_normalized = lower(   iif(locate(lower(job_type), 'penuh') > 0 || locate(lower(job_type), 'full') > 0,     'full time',   iif(locate(lower(job_type), 'paruh') > 0,     'part time',   iif(locate(lower(job_type), 'kontrak') > 0,     'contract',   iif(locate(lower(job_type), 'magang') > 0,     'internship',   iif(locate(lower(job_type), 'freelance') > 0,     'freelance',   iif(locate(lower(job_type), 'kasual') > 0,     'casual',     'unknown'   )))))) ),",
+				"          salary_normalized = iif(locate(salary, 'Not specified') > 0,    'Not specified',   salary)) ~> NormalizeGlints",
+				"DerivedJobStreet derive(title_normalized = trim(lower(title)),",
+				"          company_normalized = trim(lower(company)),",
+				"          location_normalized = lower(trim(iif(locate(location, ',') > 0, substring(location, 1, locate(location, ',') - 1), location))),",
+				"          job_type_normalized = lower(   iif(locate(lower(job_type), 'penuh') > 0 || locate(lower(job_type), 'full') > 0,     'full time',   iif(locate(lower(job_type), 'paruh') > 0,     'part time',   iif(locate(lower(job_type), 'kontrak') > 0,     'contract',   iif(locate(lower(job_type), 'magang') > 0,     'internship',   iif(locate(lower(job_type), 'freelance') > 0,     'freelance',   iif(locate(lower(job_type), 'kasual') > 0,     'casual',     'unknown'   )))))) ),",
+				"          salary_normalized = iif(locate(salary, 'Not specified') > 0,    'Not specified',   salary)) ~> NormalizeJobStreet",
+				"NormalizeGlints, NormalizeJobStreet union(byName: true)~> UnionJobListings"
 			]
 		}
 	}

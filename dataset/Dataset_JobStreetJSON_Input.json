@@ -1,0 +1,48 @@
+{
+	"name": "Dataset_JobStreetJSON_Input",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LinkedService_ADLS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "jobstreet_indo_20260506_111747.json",
+				"folderPath": "jobstreet/2026/05/06",
+				"fileSystem": "raw"
+			}
+		},
+		"schema": {
+			"type": "object",
+			"properties": {
+				"job_id": {
+					"type": "string"
+				},
+				"title": {
+					"type": "string"
+				},
+				"company": {
+					"type": "string"
+				},
+				"location": {
+					"type": "string"
+				},
+				"job_type": {
+					"type": "string"
+				},
+				"salary": {
+					"type": "string"
+				},
+				"description": {
+					"type": "string"
+				},
+				"job_url": {
+					"type": "string"
+				}
+			}
+		}
+	}
+}
