@@ -44,6 +44,12 @@
 				},
 				{
 					"name": "FilterEmpty"
+				},
+				{
+					"name": "DeduplicateJobs"
+				},
+				{
+					"name": "FinalDeduplicated"
 				}
 			],
 			"scriptLines": [
@@ -120,7 +126,28 @@
 				"          job_type_normalized = lower(   iif(locate(lower(job_type), 'penuh') > 0 || locate(lower(job_type), 'full') > 0,     'full time',   iif(locate(lower(job_type), 'paruh') > 0,     'part time',   iif(locate(lower(job_type), 'kontrak') > 0,     'contract',   iif(locate(lower(job_type), 'magang') > 0,     'internship',   iif(locate(lower(job_type), 'freelance') > 0,     'freelance',   iif(locate(lower(job_type), 'kasual') > 0,     'casual',     'unknown'   )))))) ),",
 				"          salary_normalized = iif(locate(salary, 'Not specified') > 0,    'Not specified',   salary)) ~> NormalizeJobStreet",
 				"NormalizeGlints, NormalizeJobStreet union(byName: true)~> UnionJobListings",
-				"UnionJobListings filter(length(trim(description)) > 0) ~> FilterEmpty"
+				"UnionJobListings filter(length(trim(description)) > 0) ~> FilterEmpty",
+				"FilterEmpty aggregate(groupBy(title_normalized,",
+				"          company_normalized,",
+				"          location_normalized),",
+				"     source = first(source),",
+				"          composite_id = first(composite_id),",
+				"          job_id = first(job_id),",
+				"          job_type_normalized = first(job_type_normalized),",
+				"          salary_normalized = first(salary_normalized),",
+				"          description = first(description),",
+				"          posted_date = max(posted_date),",
+				"          experience_required = first(experience_required),",
+				"          work_policy = first(work_policy),",
+				"          job_url = first(job_url)) ~> DeduplicateJobs",
+				"DeduplicateJobs select(mapColumn(",
+				"          title = title_normalized,",
+				"          company = company_normalized,",
+				"          location = location_normalized,",
+				"          max_posted_date",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> FinalDeduplicated"
 			]
 		}
 	}
